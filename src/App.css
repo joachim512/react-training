@@ -33,6 +33,18 @@
   }
 }
 
+.card-board {
+  border: 2px solid;
+  border-radius: 10px;
+}
+.square{
+  border-color: #fff;
+  border-style: dotted;
+  border-radius: 0;
+  height: 50px;
+  width: 50px;
+}
+
 .card {
   padding: 2em;
   border: 2px solid;

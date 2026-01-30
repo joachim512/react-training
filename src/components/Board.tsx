@@ -9,16 +9,17 @@ function Board({gridValue, onAction}:boardProps){
     
     return(
         <>
-            <div style={{ display: "grid", gridTemplateColumns: "repeat(10, 1fr)" }}>
-                {gridValue.map((value, index) => (
-                    <button
-                        key={index}
-                        onClick={() => onAction(index, value)}
-                    >
-                    {value}
-                    </button>
-                ))}
-            </div>
+                <div style={{ display: "grid", gridTemplateColumns: "repeat(10, 1fr)" }}>
+                    {gridValue.map((value, index) => (
+                        <button
+                            className="square"
+                            key={index}
+                            onClick={() => onAction(index, value)}
+                        >
+                        {value}
+                        </button>
+                    ))}
+                </div>
 
         </>
     )

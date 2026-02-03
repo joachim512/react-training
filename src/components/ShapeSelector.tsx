@@ -1,9 +1,8 @@
 interface props {
   value: string;
   onAction: (value: string) => void;
-  onGridSize: (value: number) => void;
 }
-function Buttons({ value, onAction, onGridSize }: props) {
+function ShapeSelector({ value, onAction }: props) {
   return (
     <>
       <div className="card">
@@ -38,20 +37,10 @@ function Buttons({ value, onAction, onGridSize }: props) {
             Cross
           </label>
         </div>
-        <div className="padding">
-          <label htmlFor="gridSize">
-            Grid Size:
-            <input
-              type="number"
-              onChange={(e) => {
-                onGridSize(Number(e.target.value));
-              }}
-            />
-          </label>
-        </div>
+        
       </div>
     </>
   );
 }
 
-export default Buttons;
+export default ShapeSelector;

@@ -6,7 +6,7 @@ interface boardProps {
 }
 
 function Board({ gridValue, onAction }: boardProps) {
-  const squareRoot = Math.sqrt(gridValue.length);
+  const squareRoot = Math.floor(Math.sqrt(gridValue.length));
   return (
     <>
       <div

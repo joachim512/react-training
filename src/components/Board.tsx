@@ -10,7 +10,7 @@ function Board({ gridValue, onAction }: boardProps) {
   return (
     <>
       <div
-        className="container"
+        className="gridContainer"
         style={{
           display: "grid",
           gridTemplateColumns: `repeat(${squareRoot}, 0fr)`,
@@ -22,7 +22,7 @@ function Board({ gridValue, onAction }: boardProps) {
             key={index}
             onClick={() => onAction(index, value)}
           >
-            {value}
+            {index}
           </button>
         ))}
       </div>

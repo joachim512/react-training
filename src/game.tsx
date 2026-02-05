@@ -1,55 +1,57 @@
 import { useState } from "react";
 import ShapeSelector from "./components/ShapeSelector";
 import Board from "./components/Board";
-import BoardCondition from "./components/board-condition";
+import BoardCondition from "./components/board-settings";
 function Game() {
   //state for turn
   const [selectedShape, setSelectedShape] = useState<string>("");
   //state for grid value
   const [gridVal, setGridVal] = useState<string[]>(Array(0).fill(""));
+  //State for grid size
+  const [gridSize, setGridSize] = useState<number>(0);
   //state for player turn
   const [playerTurn, setPlayerTurn] = useState<boolean>(true); //true is player 1
   //state for required count to win
   const [winCount, setWinCount] = useState<number>(3);
+  //state to determine winner
+
 
   const handleClick = (val: string) => {
     setSelectedShape(val);
   };
   const winner = () => {
-    const n = Math.sqrt(gridVal.length);
-    if (!Number.isInteger(n)) return null;
-    const get = (r: number, c: number) => gridVal[r * n + c];
+    const numCols = Math.floor(Math.sqrt(gridSize));
+
     const directions = [
-      [0, 1],
-      [1, 0],
-      [1, 1],
-      [1, -1],
+      { dr: 0, dc: 1 },
+      { dr: 1, dc: 0 },
+      { dr: 1, dc: 1 },
+      { dr: 1, dc: -1 },
     ];
-    for (let r = 0; r < n; r++) {
-      for (let c = 0; c < n; c++) {
-        const start = get(r, c);
-        if (!start) continue;
-        for (const [dr, dc] of directions) {
-          let count = 1;
-          for (let k = 1; k < winCount; k++) {
-            const nr = r + dr * k;
-            const nc = c + dc * k;
-            if (
-              nr < 0 ||
-              nr >= n ||
-              nc < 0 ||
-              nc >= n ||
-              get(nr, nc) !== start
-            ) {
-              break;
-            }
-            count++;
-          }
-          if (count === winCount) {
-            return start;
+
+    const getVal = (r: number, c: number) => {
+      if (c < 0 || c >= numCols || r < 0) return null;
+      const index = r * numCols + c;
+      return gridVal[index] || null;
+    };
+
+    for (let i = 0; i < gridVal.length; i++) {
+      const row = Math.floor(i / numCols);
+      const col = i % numCols;
+      const player = gridVal[i];
+
+      if (!player) continue;
+
+      const isWin = directions.some(({ dr, dc }) => {
+        for (let step = 1; step < winCount; step++) {
+          if (getVal(row + dr * step, col + dc * step) !== player) {
+            return false;
           }
         }
-      }
+        return true;
+      });
+
+      if (isWin) return player;
     }
 
     return null;
@@ -68,9 +70,15 @@ function Game() {
     });
     setSelectedShape((prev) => (prev === "O" ? "X" : "O"));
     setPlayerTurn((prev) => (prev ? false : true));
-    winner();
+    // winner();
+  };
+  const handleGameRestart = () => {
+    setGridVal(Array(gridSize).fill(""));
+    setPlayerTurn(true);
+    setSelectedShape("");
   };
   const handleGridSize = (size: number) => {
+    setGridSize(size);
     setGridVal(Array(size).fill(""));
   };
   return (
@@ -82,13 +90,16 @@ function Game() {
         winner() && <h4>{!playerTurn ? "PLAYER ONE WIN" : "PLAYER TWO WIN"}</h4>
       )}
       <ShapeSelector value={selectedShape} onAction={handleClick} />
+      <br />
       <BoardCondition
+        size={gridSize}
         winCount={winCount}
         onWinCount={handleWinCount}
         onGridSize={handleGridSize}
+        onRestart={handleGameRestart}
       />
+      <br />
       <Board gridValue={gridVal} onAction={handleGridValue} />
-      
     </>
   );
 }

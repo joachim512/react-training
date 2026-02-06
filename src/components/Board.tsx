@@ -22,7 +22,7 @@ function Board({ gridValue, onAction }: boardProps) {
             key={index}
             onClick={() => onAction(index, value)}
           >
-            {index}
+            {value}
           </button>
         ))}
       </div>

@@ -2,6 +2,7 @@ import { useState } from "react";
 import ShapeSelector from "./components/ShapeSelector";
 import Board from "./components/Board";
 import BoardCondition from "./components/board-settings";
+
 function Game() {
   //state for turn
   const [selectedShape, setSelectedShape] = useState<string>("");
@@ -13,14 +14,19 @@ function Game() {
   const [playerTurn, setPlayerTurn] = useState<boolean>(true); //true is player 1
   //state for required count to win
   const [winCount, setWinCount] = useState<number>(3);
-  //state to determine winner
-
-
+  //state for winner
+  const [winnerState, setWinnerState] = useState<string>("");
+  //state for winning set
+  const [winningSets, setWinningSets] = useState<number[]>(Array(0).fill(0));
+  
   const handleClick = (val: string) => {
     setSelectedShape(val);
   };
-  const winner = () => {
-    const numCols = Math.floor(Math.sqrt(gridSize));
+
+  const winner = (copy: string[]) => {
+    // debugger;
+    // selectedShape, playerTurn, gridVal
+    const numCols = Math.floor(Math.sqrt(copy.length));
 
     const directions = [
       { dr: 0, dc: 1 },
@@ -32,63 +38,85 @@ function Game() {
     const getVal = (r: number, c: number) => {
       if (c < 0 || c >= numCols || r < 0) return null;
       const index = r * numCols + c;
-      return gridVal[index] || null;
+      return { gridValue: copy[index] || "", Index: index };
     };
 
-    for (let i = 0; i < gridVal.length; i++) {
+    for (let i = 0; i < copy.length; i++) {
+      let winningCombination: number[] = [i];
       const row = Math.floor(i / numCols);
       const col = i % numCols;
-      const player = gridVal[i];
+      const player = copy[i];
 
       if (!player) continue;
 
       const isWin = directions.some(({ dr, dc }) => {
         for (let step = 1; step < winCount; step++) {
-          if (getVal(row + dr * step, col + dc * step) !== player) {
+          const { gridValue, Index } =
+            getVal(row + dr * step, col + dc * step) || {};
+          if (gridValue !== player) {
             return false;
           }
+          if (Index !== undefined) winningCombination.push(Index);
         }
         return true;
       });
-
-      if (isWin) return player;
+      if (isWin) {
+        setWinningSets(winningCombination);
+        setWinnerState(player);
+        return player;
+      }
     }
 
     return null;
   };
+
+
   const handleWinCount = (val: number) => {
     setWinCount(val);
   };
+
   const handleGridValue = (index: number) => {
-    if (!selectedShape || winner() || gridVal[index]) {
+    if (!selectedShape || !!winnerState || gridVal[index]) {
       return;
     }
     setGridVal((prev) => {
       const copy = [...prev];
       copy[index] = selectedShape;
+      winner(copy)
       return copy;
     });
     setSelectedShape((prev) => (prev === "O" ? "X" : "O"));
     setPlayerTurn((prev) => (prev ? false : true));
-    // winner();
   };
+
   const handleGameRestart = () => {
-    setGridVal(Array(gridSize).fill(""));
+    setWinningSets(Array(0).fill(0));
+    setWinnerState("");
+    setGridVal(Array(0).fill(""));
     setPlayerTurn(true);
     setSelectedShape("");
+    setGridSize(0);
   };
+
   const handleGridSize = (size: number) => {
     setGridSize(size);
-    setGridVal(Array(size).fill(""));
+    setGridVal(Array(size * size).fill(""));
   };
+
   return (
     <>
       <h3>{playerTurn ? "PLAYER ONE TURN" : "PLAYER TWO TURN"}</h3>
       {!selectedShape ? (
         <p>Choose a shape to begin</p>
       ) : (
-        winner() && <h4>{!playerTurn ? "PLAYER ONE WIN" : "PLAYER TWO WIN"}</h4>
-      )}
+        winnerState  && (
+          <h4>{!playerTurn ? "PLAYER ONE WIN" : "PLAYER TWO WIN"}</h4>
+        )
+      )}{
+        (winningSets.length === 0 
+          && gridVal.every(c => c !== "")
+        ) && <p>DRAW</p>
+      }
       <ShapeSelector value={selectedShape} onAction={handleClick} />
       <br />
       <BoardCondition
@@ -99,7 +127,11 @@ function Game() {
         onRestart={handleGameRestart}
       />
       <br />
-      <Board gridValue={gridVal} onAction={handleGridValue} />
+      <Board
+        gridValue={gridVal}
+        onAction={handleGridValue}
+        winningRow={winningSets}
+      />
     </>
   );
 }

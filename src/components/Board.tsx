@@ -2,11 +2,13 @@
 
 interface boardProps {
   gridValue: string[]; //This value is the user input for the grid
+  winningRow: number[];
   onAction: (index: number, value: string) => void;
 }
 
-function Board({ gridValue, onAction }: boardProps) {
+function Board({ gridValue, winningRow, onAction }: boardProps) {
   const squareRoot = Math.floor(Math.sqrt(gridValue.length));
+  const indexes = new Set(winningRow);
   return (
     <>
       <div
@@ -18,7 +20,7 @@ function Board({ gridValue, onAction }: boardProps) {
       >
         {gridValue.map((value, index) => (
           <button
-            className="square"
+            className={indexes.has(index) ? "square-highlight" : "square"}
             key={index}
             onClick={() => onAction(index, value)}
           >

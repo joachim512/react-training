@@ -17,6 +17,7 @@ function Game() {
     Array(defaultGridSize * defaultGridSize).fill(""),
   );
 
+  const [lastMove, setLastMove] = useState<number>(-1)
   const [gridSize, setGridSize] = useState<number>(defaultGridSize);
 
   //state for required count to win
@@ -32,7 +33,7 @@ function Game() {
     setSelectedShape(val);
   };
 
-  const winnerResult = getWinner(gridArr, winCount);
+  const winnerResult = getWinner(gridArr, winCount, lastMove);
 
   const handleWinCount = (val: number) => {
     setWinCount(val);
@@ -42,6 +43,7 @@ function Game() {
     if (!selectedShape || !!winnerResult?.player || gridArr[index]) {
       return;
     }
+    setLastMove(index);
     setGridVal((prev) => {
       const copy = [...prev];
       copy[index] = selectedShape;

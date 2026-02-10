@@ -6,7 +6,8 @@ interface props {
   onRestart: ()=>void
 }
 
-const boardCondition = ({ winCount, size, onWinCount, onGridSize, onRestart }: props) => {
+const BoardSetting = ({ winCount, size, onWinCount, onGridSize, onRestart }: props) => {
+  // const [gridSize, setGridSize] = useState<number>(defaultGridSize);
   return (
     <>
       <div className="card">
@@ -47,4 +48,4 @@ const boardCondition = ({ winCount, size, onWinCount, onGridSize, onRestart }: p
     </>
   );
 };
-export default boardCondition;
+export default BoardSetting;

@@ -1,32 +1,37 @@
 import { useState } from "react";
 import ShapeSelector from "./components/ShapeSelector";
 import Board from "./components/Board";
-import BoardCondition from "./components/board-settings";
+import BoardSetting from "./components/board-settings";
+
+const defaultShape = "O";
+const defaultGridSize = 3;
+const defaultWinCount = 3;
 
 function Game() {
-  //state for turn
-  const [selectedShape, setSelectedShape] = useState<string>("");
+  const [selectedShape, setSelectedShape] = useState<string>(defaultShape);
   //state for grid value
-  const [gridVal, setGridVal] = useState<string[]>(Array(0).fill(""));
-  //State for grid size
-  const [gridSize, setGridSize] = useState<number>(0);
-  //state for player turn
-  const [playerTurn, setPlayerTurn] = useState<boolean>(true); //true is player 1
+  const [gridVal, setGridVal] = useState<string[]>(
+    Array(defaultGridSize * defaultGridSize).fill(""),
+  );
+
+  const [gridSize, setGridSize] = useState<number>(defaultGridSize);
+
   //state for required count to win
-  const [winCount, setWinCount] = useState<number>(3);
+  const [winCount, setWinCount] = useState<number>(defaultWinCount);
   //state for winner
-  const [winnerState, setWinnerState] = useState<string>("");
-  //state for winning set
-  const [winningSets, setWinningSets] = useState<number[]>(Array(0).fill(0));
-  
+  // const [winnerState, setWinnerState] = useState<string>("");
+  // //state for winning set
+  // const [winningSets, setWinningSets] = useState<number[]>(Array(0).fill(0));
+
+  const player1 = selectedShape === "X";
+
   const handleClick = (val: string) => {
     setSelectedShape(val);
   };
 
-  const winner = (copy: string[]) => {
+  const getWinner = (board: string[]) => {
     // debugger;
-    // selectedShape, playerTurn, gridVal
-    const numCols = Math.floor(Math.sqrt(copy.length));
+    const numCols = Math.floor(Math.sqrt(board.length));
 
     const directions = [
       { dr: 0, dc: 1 },
@@ -38,14 +43,14 @@ function Game() {
     const getVal = (r: number, c: number) => {
       if (c < 0 || c >= numCols || r < 0) return null;
       const index = r * numCols + c;
-      return { gridValue: copy[index] || "", Index: index };
+      return { gridValue: board[index] || "", Index: index };
     };
 
-    for (let i = 0; i < copy.length; i++) {
-      let winningCombination: number[] = [i];
+    for (let i = 0; i < board.length; i++) {
+      const winningCombination: number[] = [i];
       const row = Math.floor(i / numCols);
       const col = i % numCols;
-      const player = copy[i];
+      const player = board[i];
 
       if (!player) continue;
 
@@ -61,41 +66,36 @@ function Game() {
         return true;
       });
       if (isWin) {
-        setWinningSets(winningCombination);
-        setWinnerState(player);
-        return player;
+        return { player, winningCombination };
       }
     }
 
     return null;
   };
 
+  const winnerResult = getWinner(gridVal);
 
   const handleWinCount = (val: number) => {
     setWinCount(val);
   };
 
   const handleGridValue = (index: number) => {
-    if (!selectedShape || !!winnerState || gridVal[index]) {
+    if (!selectedShape || !!winnerResult?.player || gridVal[index]) {
       return;
     }
     setGridVal((prev) => {
       const copy = [...prev];
       copy[index] = selectedShape;
-      winner(copy)
+      // winner(copy)
       return copy;
     });
     setSelectedShape((prev) => (prev === "O" ? "X" : "O"));
-    setPlayerTurn((prev) => (prev ? false : true));
   };
 
   const handleGameRestart = () => {
-    setWinningSets(Array(0).fill(0));
-    setWinnerState("");
-    setGridVal(Array(0).fill(""));
-    setPlayerTurn(true);
-    setSelectedShape("");
-    setGridSize(0);
+    setGridVal(Array(defaultGridSize * defaultGridSize).fill(""));
+    setSelectedShape(defaultShape);
+    setGridSize(defaultGridSize);
   };
 
   const handleGridSize = (size: number) => {
@@ -105,21 +105,20 @@ function Game() {
 
   return (
     <>
-      <h3>{playerTurn ? "PLAYER ONE TURN" : "PLAYER TWO TURN"}</h3>
+      <h3>{player1 ? "PLAYER ONE TURN" : "PLAYER TWO TURN"}</h3>
       {!selectedShape ? (
         <p>Choose a shape to begin</p>
       ) : (
-        winnerState  && (
-          <h4>{!playerTurn ? "PLAYER ONE WIN" : "PLAYER TWO WIN"}</h4>
+        winnerResult?.player && (
+          <h4>{player1 ? "PLAYER ONE WIN" : "PLAYER TWO WIN"}</h4>
         )
-      )}{
-        (winningSets.length === 0 
-          && gridVal.every(c => c !== "")
-        ) && <p>DRAW</p>
-      }
+      )}
+      {!winnerResult?.player && gridVal && gridVal.every((c) => c !== "") && (
+        <p>DRAW</p>
+      )}
       <ShapeSelector value={selectedShape} onAction={handleClick} />
       <br />
-      <BoardCondition
+      <BoardSetting
         size={gridSize}
         winCount={winCount}
         onWinCount={handleWinCount}
@@ -130,7 +129,7 @@ function Game() {
       <Board
         gridValue={gridVal}
         onAction={handleGridValue}
-        winningRow={winningSets}
+        winningRow={winnerResult?.winningCombination}
       />
     </>
   );

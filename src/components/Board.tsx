@@ -2,7 +2,7 @@
 
 interface boardProps {
   gridValue: string[]; //This value is the user input for the grid
-  winningRow: number[];
+  winningRow?: number[];
   onAction: (index: number, value: string) => void;
 }
 

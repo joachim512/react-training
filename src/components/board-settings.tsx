@@ -7,7 +7,6 @@ interface props {
 }
 
 const BoardSetting = ({ winCount, size, onWinCount, onGridSize, onRestart }: props) => {
-  // const [gridSize, setGridSize] = useState<number>(defaultGridSize);
   return (
     <>
       <div className="card">

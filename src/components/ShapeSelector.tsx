@@ -1,6 +1,8 @@
+import type { shape } from "../types/shape";
+
 interface props {
   value: string;
-  onAction: (value: string) => void;
+  onAction: (value: shape) => void;
 }
 function ShapeSelector({ value, onAction }: props) {
   return (
@@ -15,7 +17,7 @@ function ShapeSelector({ value, onAction }: props) {
               value="O"
               checked={value === "O"}
               onChange={(e) => {
-                onAction(e.target.value);
+                onAction("O");
               }}
             />
             Circle
@@ -31,7 +33,7 @@ function ShapeSelector({ value, onAction }: props) {
               value="X"
               checked={value === "X"}
               onChange={(e) => {
-                onAction(e.target.value);
+                onAction("X");
               }}
             />
             Cross

@@ -2,15 +2,18 @@ import { useState } from "react";
 import ShapeSelector from "./components/ShapeSelector";
 import Board from "./components/Board";
 import BoardSetting from "./components/board-settings";
+import getWinner from "./helper/getWinner";
+import type { shape } from "./types/shape";
 
 const defaultShape = "O";
 const defaultGridSize = 3;
 const defaultWinCount = 3;
 
 function Game() {
-  const [selectedShape, setSelectedShape] = useState<string>(defaultShape);
+  const [selectedShape, setSelectedShape] = useState<shape>(defaultShape);
+
   //state for grid value
-  const [gridVal, setGridVal] = useState<string[]>(
+  const [gridArr, setGridVal] = useState<shape[]>(
     Array(defaultGridSize * defaultGridSize).fill(""),
   );
 
@@ -23,64 +26,20 @@ function Game() {
   // //state for winning set
   // const [winningSets, setWinningSets] = useState<number[]>(Array(0).fill(0));
 
-  const player1 = selectedShape === "X";
+  const player1 = selectedShape === "O";
 
-  const handleClick = (val: string) => {
+  const handleShapeSwap = (val: shape) => {
     setSelectedShape(val);
   };
 
-  const getWinner = (board: string[]) => {
-    // debugger;
-    const numCols = Math.floor(Math.sqrt(board.length));
-
-    const directions = [
-      { dr: 0, dc: 1 },
-      { dr: 1, dc: 0 },
-      { dr: 1, dc: 1 },
-      { dr: 1, dc: -1 },
-    ];
-
-    const getVal = (r: number, c: number) => {
-      if (c < 0 || c >= numCols || r < 0) return null;
-      const index = r * numCols + c;
-      return { gridValue: board[index] || "", Index: index };
-    };
-
-    for (let i = 0; i < board.length; i++) {
-      const winningCombination: number[] = [i];
-      const row = Math.floor(i / numCols);
-      const col = i % numCols;
-      const player = board[i];
-
-      if (!player) continue;
-
-      const isWin = directions.some(({ dr, dc }) => {
-        for (let step = 1; step < winCount; step++) {
-          const { gridValue, Index } =
-            getVal(row + dr * step, col + dc * step) || {};
-          if (gridValue !== player) {
-            return false;
-          }
-          if (Index !== undefined) winningCombination.push(Index);
-        }
-        return true;
-      });
-      if (isWin) {
-        return { player, winningCombination };
-      }
-    }
-
-    return null;
-  };
-
-  const winnerResult = getWinner(gridVal);
+  const winnerResult = getWinner(gridArr, winCount);
 
   const handleWinCount = (val: number) => {
     setWinCount(val);
   };
 
   const handleGridValue = (index: number) => {
-    if (!selectedShape || !!winnerResult?.player || gridVal[index]) {
+    if (!selectedShape || !!winnerResult?.player || gridArr[index]) {
       return;
     }
     setGridVal((prev) => {
@@ -93,30 +52,29 @@ function Game() {
   };
 
   const handleGameRestart = () => {
-    setGridVal(Array(defaultGridSize * defaultGridSize).fill(""));
+    setGridVal(Array(gridSize * gridSize).fill(""));
     setSelectedShape(defaultShape);
-    setGridSize(defaultGridSize);
   };
 
   const handleGridSize = (size: number) => {
     setGridSize(size);
     setGridVal(Array(size * size).fill(""));
   };
+  const draw =
+    !winnerResult?.player && gridArr && gridArr.every((c) => c !== "");
+
+  const statusText = winnerResult?.player
+    ? `${winnerResult.player} WINS`
+    : draw
+      ? `DRAW`
+      : player1
+        ? "PLAYER ONE TURN"
+        : "PLAYER TWO TURN";
 
   return (
     <>
-      <h3>{player1 ? "PLAYER ONE TURN" : "PLAYER TWO TURN"}</h3>
-      {!selectedShape ? (
-        <p>Choose a shape to begin</p>
-      ) : (
-        winnerResult?.player && (
-          <h4>{player1 ? "PLAYER ONE WIN" : "PLAYER TWO WIN"}</h4>
-        )
-      )}
-      {!winnerResult?.player && gridVal && gridVal.every((c) => c !== "") && (
-        <p>DRAW</p>
-      )}
-      <ShapeSelector value={selectedShape} onAction={handleClick} />
+      <h3>{statusText}</h3>
+      <ShapeSelector value={selectedShape} onAction={handleShapeSwap} />
       <br />
       <BoardSetting
         size={gridSize}
@@ -127,7 +85,7 @@ function Game() {
       />
       <br />
       <Board
-        gridValue={gridVal}
+        gridValue={gridArr}
         onAction={handleGridValue}
         winningRow={winnerResult?.winningCombination}
       />

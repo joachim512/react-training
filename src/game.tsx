@@ -17,15 +17,11 @@ function Game() {
     Array(defaultGridSize * defaultGridSize).fill(""),
   );
 
-  const [lastMove, setLastMove] = useState<number>(-1)
+  const [lastMove, setLastMove] = useState<number>(-1);
   const [gridSize, setGridSize] = useState<number>(defaultGridSize);
 
   //state for required count to win
   const [winCount, setWinCount] = useState<number>(defaultWinCount);
-  //state for winner
-  // const [winnerState, setWinnerState] = useState<string>("");
-  // //state for winning set
-  // const [winningSets, setWinningSets] = useState<number[]>(Array(0).fill(0));
 
   const player1 = selectedShape === "O";
 
@@ -64,14 +60,17 @@ function Game() {
   };
   const draw =
     !winnerResult?.player && gridArr && gridArr.every((c) => c !== "");
-
-  const statusText = winnerResult?.player
-    ? `${winnerResult.player} WINS`
-    : draw
-      ? `DRAW`
-      : player1
-        ? "PLAYER ONE TURN"
-        : "PLAYER TWO TURN";
+  let statusText: string = "";
+  if (winnerResult?.player) {
+    statusText = `${winnerResult.player} WINS`;
+  } else if (draw) {
+    statusText = `DRAW`;
+  }
+  if (player1) {
+    statusText = "PLAYER ONE TURN";
+  } else {
+    statusText = "PLAYER TWO TURN";
+  }
 
   return (
     <>

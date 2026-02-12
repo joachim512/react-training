@@ -59,17 +59,14 @@ function Game() {
     setGridVal(Array(size * size).fill(""));
   };
   const draw =
-    !winnerResult?.player && gridArr && gridArr.every((c) => c !== "");
+    !winnerResult?.player && gridArr.every((c) => c !== "");
   let statusText: string = "";
   if (winnerResult?.player) {
-    statusText = `${winnerResult.player} WINS`;
+  statusText = `${winnerResult.player} WINS`;
   } else if (draw) {
-    statusText = `DRAW`;
-  }
-  if (player1) {
-    statusText = "PLAYER ONE TURN";
+    statusText = "DRAW";
   } else {
-    statusText = "PLAYER TWO TURN";
+    statusText = player1 ? "PLAYER ONE TURN" : "PLAYER TWO TURN";
   }
 
   return (
